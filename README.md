@@ -55,3 +55,7 @@ Contains all the tests for training or using previously trained models. Generall
 * starts a model
 * trains the model / loads a previously trained model
 * evaluates a few cases (existing and non-existing)
+
+## java resources
+
+The resources folder contain all the datasets used for this
