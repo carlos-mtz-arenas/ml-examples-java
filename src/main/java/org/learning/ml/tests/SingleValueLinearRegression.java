@@ -35,11 +35,11 @@ public class SingleValueLinearRegression {
         final var bitcoinPrices = content.readAll();
 
         // test the models - either train one from scratch or use existing values from previous training sessions
-        trainAndTest(bitcoinPrices);
-        //useInitializedModel(bitcoinPrices);
+        //trainAndTest(bitcoinPrices);
+        useInitializedModel();
     }
 
-    private static void useInitializedModel(final Collection<BitcoinPriceDto> bitcoinPrices) {
+    private static void useInitializedModel() {
         // manually pass the information for the parameters
         final var regressionModel = new SingleLinearRegressionModel(BigDecimal.valueOf(2.999071),
                 BigDecimal.valueOf(-60566889.443382));
@@ -50,10 +50,13 @@ public class SingleValueLinearRegression {
     private static void trainAndTest(final Collection<BitcoinPriceDto> bitcoinPrices) {
         final var regressionModel = new SingleLinearRegressionModel();
 
-        measureProcess("Training", () ->
-                regressionModel.learn(bitcoinPrices, bitcoinPrices.parallelStream()
-                        .map(BitcoinPriceDto::getPrice)
-                        .collect(Collectors.toList())));
+        final var answers = bitcoinPrices.stream()
+                .map(BitcoinPriceDto::getPrice)
+                .collect(Collectors.toList());
+
+        measureProcess("Training", () -> {
+            regressionModel.learn(bitcoinPrices, answers);
+        });
 
         guessUsingModel(regressionModel);
     }
