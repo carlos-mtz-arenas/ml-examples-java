@@ -14,6 +14,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import static org.learning.ml.utils.TimeTrackingUtils.measureProcess;
+
 public class SingleValueLinearRegression {
 
     public static void main(String[] args) throws IOException {
@@ -48,18 +50,30 @@ public class SingleValueLinearRegression {
     private static void trainAndTest(final Collection<BitcoinPriceDto> bitcoinPrices) {
         final var regressionModel = new SingleLinearRegressionModel();
 
-        regressionModel.learn(bitcoinPrices, bitcoinPrices.parallelStream()
-                .map(BitcoinPriceDto::getPrice)
-                .collect(Collectors.toList()));
+        measureProcess("Training", () ->
+                regressionModel.learn(bitcoinPrices, bitcoinPrices.parallelStream()
+                        .map(BitcoinPriceDto::getPrice)
+                        .collect(Collectors.toList())));
 
         guessUsingModel(regressionModel);
     }
 
     private static void guessUsingModel(final SingleLinearRegressionModel regressionModel) {
-        final var predictionFuture = regressionModel.predict(new BitcoinPriceDto("2022-01-01"));
-        System.out.println("The future prediction is " + predictionFuture);
+        System.out.println(":::::::::::::::::::::::::::::::");
 
-        final var predictionExisting = regressionModel.predict(new BitcoinPriceDto("2020-11-04"));
-        System.out.println("The guess for existing date is " + predictionExisting);
+        measureProcess("Prediction of the future", () -> {
+            final var date = "2022-01-01";
+            final var predictionFuture = regressionModel.predict(new BitcoinPriceDto(date));
+            System.out.println("The prediction of the date [" + date + "] is: " + predictionFuture);
+        });
+
+        System.out.println(":::::::::::::::::::::::::::::::");
+
+        measureProcess("Prediction of the past", () -> {
+            final var date = "2020-11-04";
+            final var predictionExisting = regressionModel.predict(new BitcoinPriceDto(date));
+            System.out.println("The guess for the date [" + date + "] is: " + predictionExisting);
+        });
     }
+
 }
